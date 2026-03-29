@@ -19,12 +19,7 @@ namespace CSM.ExtraLandscapingTools.Utils
                 return null;
             }
 
-            Type type1;
-            if (name == "Water")
-                type1 = typeof(WaterPanel);
-            else
-                type1 = Util.FindType(name + "Group" + "Panel");
-
+            Type type1 = Util.FindType(name + "Group" + "Panel");
             if (type1 != null && !type1.IsSubclassOf(typeof(GeneratedGroupPanel)) && !type1.IsSubclassOf(typeof(GeneratedScrollPanel)))
                 type1 = null;
             if (type1 == null)

@@ -5,6 +5,8 @@ using ColossalFramework.UI;
 using ICities;
 using CSM.ExtraLandscapingTools.Surface;
 using CSM.ExtraLandscapingTools.Utils;
+using CSM.ExtraLandscapingTools.Patching;
+using HarmonyLib;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -48,6 +50,9 @@ namespace CSM.ExtraLandscapingTools.Mod
             }
             try
             {
+                var harmony = new Harmony("com.csm.extralandscapingtools");
+                harmony.PatchAll(Assembly.GetExecutingAssembly());
+
                 var extraTools = SetUpExtraTools(mode, toolController);
                 AddExtraToolsToController(toolController, extraTools);
             }
@@ -182,8 +187,6 @@ namespace CSM.ExtraLandscapingTools.Mod
 
         private static void SetUpWaterTool(ICollection<ToolBase> extraTools)
         {
-            var optionsPanel = SetupWaterPanel();
-            if (optionsPanel == null) return;
             var waterTool = ToolsModifierControl.GetTool<WaterTool>();
             if (waterTool != null) return;
             waterTool = ToolsModifierControl.toolController.gameObject.AddComponent<WaterTool>();
@@ -526,7 +529,7 @@ namespace CSM.ExtraLandscapingTools.Mod
             var waterPanel = optionsBar.AddUIComponent<UIPanel>();
             waterPanel.name = "WaterPanel";
             waterPanel.backgroundSprite = "MenuPanel2";
-            waterPanel.size = new Vector2(231, 184);
+            waterPanel.size = new Vector2(231, 230);
             waterPanel.isVisible = false;
             waterPanel.relativePosition = new Vector3(-256, -166);
 
@@ -570,11 +573,34 @@ namespace CSM.ExtraLandscapingTools.Mod
             waterCapacitySliderThumb.size = new Vector2(10, 20);
             waterCapacitySlider.thumbObject = waterCapacitySliderThumb;
 
+            // Tool selection buttons
+            var atlas = Util.CreateAtlasFromResources(new List<string> { "WaterPlaceWater", "WaterMoveSeaLevel" });
+
+            var placeWaterBtn = waterOptionsPanel.AddUIComponent<UIButton>();
+            placeWaterBtn.name = "PlaceWater";
+            placeWaterBtn.atlas = atlas;
+            placeWaterBtn.normalFgSprite = "WaterPlaceWater";
+            placeWaterBtn.hoveredFgSprite = "WaterPlaceWaterHovered";
+            placeWaterBtn.pressedFgSprite = "WaterPlaceWaterPressed";
+            placeWaterBtn.size = new Vector2(36, 36);
+            placeWaterBtn.relativePosition = new Vector2(74, 130);
+            placeWaterBtn.tooltip = "Water Creator Tool";
+
+            var moveSeaLevelBtn = waterOptionsPanel.AddUIComponent<UIButton>();
+            moveSeaLevelBtn.name = "MoveSeaLevel";
+            moveSeaLevelBtn.atlas = atlas;
+            moveSeaLevelBtn.normalFgSprite = "WaterMoveSeaLevel";
+            moveSeaLevelBtn.hoveredFgSprite = "WaterMoveSeaLevelHovered";
+            moveSeaLevelBtn.pressedFgSprite = "WaterMoveSeaLevelPressed";
+            moveSeaLevelBtn.size = new Vector2(36, 36);
+            moveSeaLevelBtn.relativePosition = new Vector2(120, 130);
+            moveSeaLevelBtn.tooltip = "Sea Level Editor Tool";
+
             var resetButton = waterOptionsPanel.AddUIComponent<UIButton>();
             resetButton.name = "Apply";
             resetButton.localeID = "MAPEDITOR_RESET_WATER";
             resetButton.size = new Vector2(191, 38);
-            resetButton.relativePosition = new Vector3(20, 132);
+            resetButton.relativePosition = new Vector3(20, 175);
             resetButton.eventClick += (component, eventParam) =>
             {
                 ColossalFramework.Singleton<TerrainManager>.instance.WaterSimulation.m_resetWater = true;
@@ -612,8 +638,7 @@ namespace CSM.ExtraLandscapingTools.Mod
             var utoPanel = undoPanel.gameObject.AddComponent<UndoTerrainOptionPanel>();
             applyButton.eventClick += (component, eventParam) => { utoPanel.UndoTerrain(); };
 
-            var toolField = typeof(UndoTerrainOptionPanel).GetField("m_TerrainTool", BindingFlags.Instance | BindingFlags.NonPublic);
-            toolField.SetValue(utoPanel, ToolsModifierControl.GetTool<TerrainTool>());
+            utoPanel.m_TerrainTool = ToolsModifierControl.GetTool<TerrainTool>();
         }
 
         private static void SetupLevelHeightPanel(UIComponent optionsBar)

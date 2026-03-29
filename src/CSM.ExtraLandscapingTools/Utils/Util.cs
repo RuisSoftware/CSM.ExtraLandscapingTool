@@ -136,6 +136,7 @@ namespace CSM.ExtraLandscapingTools.Utils
                     var types = assembly.GetTypes();
                     foreach (var type in types.Where(type => type.Name == className))
                     {
+                        Log.Info($"FindType: found {className} in assembly {assembly.GetName().Name}");
                         return type;
                     }
                 }
@@ -144,6 +145,7 @@ namespace CSM.ExtraLandscapingTools.Utils
                     // ignored
                 }
             }
+            Log.Warn($"FindType: could not find {className}");
             return null;
         }
 

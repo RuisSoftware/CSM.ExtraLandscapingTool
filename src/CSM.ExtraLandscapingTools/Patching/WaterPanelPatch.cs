@@ -11,17 +11,35 @@ namespace CSM.ExtraLandscapingTools.Patching
     /// <summary>
     /// Patches WaterPanel to add Map Editor water tools (Water Source, Sea Level) to the in-game UI.
     /// </summary>
-    [HarmonyPatch(typeof(WaterPanel))]
     public static class WaterPanelPatch
     {
         private static UIPanel m_OptionsWaterPanel;
 
-        [HarmonyPatch("RefreshPanel")]
-        [HarmonyPostfix]
-        public static void RefreshPanelPostfix(WaterPanel __instance)
+        public static void RefreshPanelPostfix(GeneratedGroupPanel __instance)
         {
-            Log.Info("WaterPanel.RefreshPanelPostfix called.");
-            var spawnMethod = typeof(WaterPanel).GetMethod("SpawnEntry",
+            if (__instance == null || __instance.name != "Water")
+                return;
+
+            Log.Info($"WaterPanelPatch.RefreshPanelPostfix called for {__instance.GetType().Name}.");
+            AddWaterButtons(__instance);
+        }
+
+        private static void AddWaterButtons(GeneratedGroupPanel __instance)
+        {
+            // Debug: Log all methods named SpawnEntry
+            var methods = __instance.GetType().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
+            foreach (var m in methods)
+            {
+                if (m.Name == "SpawnEntry")
+                {
+                    string args = "";
+                    foreach (var p in m.GetParameters()) args += p.ParameterType.Name + ", ";
+                    Log.Info($"Found SpawnEntry on {__instance.GetType().Name}: ({args})");
+                }
+            }
+
+            // Try the complex signature first (from LandscapingPanelPatch)
+            var spawnMethod = __instance.GetType().GetMethod("SpawnEntry",
                 BindingFlags.NonPublic | BindingFlags.Instance,
                 null,
                 new[] { typeof(string), typeof(string), typeof(string), typeof(UITextureAtlas), typeof(UIComponent), typeof(bool) },
@@ -29,20 +47,32 @@ namespace CSM.ExtraLandscapingTools.Patching
 
             if (spawnMethod == null)
             {
-                Log.Warn("WaterPanel.RefreshPanelPostfix: SpawnEntry method not found.");
+                // Try the simple signature (from TerrainPanelPatch)
+                spawnMethod = __instance.GetType().GetMethod("SpawnEntry",
+                    BindingFlags.NonPublic | BindingFlags.Instance,
+                    null,
+                    new[] { typeof(string), typeof(int) },
+                    null);
+            }
+
+            if (spawnMethod == null)
+            {
+                Log.Warn($"WaterPanel ({__instance.GetType().Name}): No known SpawnEntry signature found.");
                 return;
             }
 
             // Only add if not already present
-            if (__instance.Find("PlaceWater") != null) return;
+            if (__instance.Find("PlaceWater") != null)
+            {
+                return;
+            }
 
             var atlas = Util.CreateAtlasFromResources(new List<string> { "WaterPlaceWater", "WaterMoveSeaLevel" });
             if (atlas == null)
             {
-                Log.Warn("WaterPanel.RefreshPanelPostfix: Failed to create atlas.");
+                Log.Warn("WaterPanel: Failed to create atlas.");
             }
 
-            // Note: In-game we use custom strings, or we could use MAPEDITOR_WATER_PLACE/MAPEDITOR_WATER_MOVESEA if available.
             string placeWaterTooltip = "Water Creator Tool";
             string moveSeaLevelTooltip = "Sea Level Editor Tool";
 
@@ -50,28 +80,50 @@ namespace CSM.ExtraLandscapingTools.Patching
 
             try
             {
-                var placeBtn = spawnMethod.Invoke(__instance, new object[] {
-                    "PlaceWater", placeWaterTooltip, "WaterPlaceWater", atlas,
-                    tooltipBox, true
-                }) as UIButton;
-                if (placeBtn != null) Log.Info("Added PlaceWater button.");
+                if (spawnMethod.GetParameters().Length > 2)
+                {
+                    var placeBtn = spawnMethod.Invoke(__instance, new object[] {
+                        "PlaceWater", placeWaterTooltip, "WaterPlaceWater", atlas,
+                        tooltipBox, true
+                    }) as UIButton;
+                    if (placeBtn != null) Log.Info("Added PlaceWater button (complex).");
 
-                var seaLevelBtn = spawnMethod.Invoke(__instance, new object[] {
-                    "MoveSeaLevel", moveSeaLevelTooltip, "WaterMoveSeaLevel", atlas,
-                    tooltipBox, true
-                }) as UIButton;
-                if (seaLevelBtn != null) Log.Info("Added MoveSeaLevel button.");
+                    var seaLevelBtn = spawnMethod.Invoke(__instance, new object[] {
+                        "MoveSeaLevel", moveSeaLevelTooltip, "WaterMoveSeaLevel", atlas,
+                        tooltipBox, true
+                    }) as UIButton;
+                    if (seaLevelBtn != null) Log.Info("Added MoveSeaLevel button (complex).");
+                }
+                else
+                {
+                    var placeBtn = spawnMethod.Invoke(__instance, new object[] { "PlaceWater", 0 }) as UIButton;
+                    if (placeBtn != null)
+                    {
+                        placeBtn.atlas = atlas;
+                        placeBtn.tooltip = placeWaterTooltip;
+                        Log.Info("Added PlaceWater button (simple).");
+                    }
+
+                    var seaLevelBtn = spawnMethod.Invoke(__instance, new object[] { "MoveSeaLevel", 1 }) as UIButton;
+                    if (seaLevelBtn != null)
+                    {
+                        seaLevelBtn.atlas = atlas;
+                        seaLevelBtn.tooltip = moveSeaLevelTooltip;
+                        Log.Info("Added MoveSeaLevel button (simple).");
+                    }
+                }
             }
             catch (System.Exception e)
             {
-                Log.Error($"WaterPanelPatch.RefreshPanelPostfix error: {e.Message}");
+                Log.Error($"WaterPanel.AddWaterButtons error: {e.Message}");
             }
         }
 
-        [HarmonyPatch("OnButtonClicked")]
-        [HarmonyPrefix]
-        public static bool OnButtonClickedPrefix(WaterPanel __instance, UIComponent comp)
+        public static bool OnButtonClickedPrefix(GeneratedGroupPanel __instance, UIComponent comp)
         {
+            if (__instance == null || __instance.name != "Water")
+                return true;
+
             if (comp.name == "PlaceWater" || comp.name == "MoveSeaLevel")
             {
                 WaterTool waterTool = ToolsModifierControl.SetTool<WaterTool>();
@@ -96,7 +148,7 @@ namespace CSM.ExtraLandscapingTools.Patching
             return true; // Let original handle other buttons (if any)
         }
 
-        private static void ShowWaterOptionsPanel(WaterPanel panel)
+        private static void ShowWaterOptionsPanel(GeneratedGroupPanel panel)
         {
             var optionsBar = UIView.Find<UIPanel>("OptionsBar");
 

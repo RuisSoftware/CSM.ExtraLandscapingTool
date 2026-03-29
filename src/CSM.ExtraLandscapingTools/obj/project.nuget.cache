@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "S0gFWAupd4FcmZectS8Y6lPftHEpWH6VTbSJOyAz7Y8Umz/HtjQHjEGZ6VjcjEpS2HZxCq0vpGDvX0aTv60tQA==",
+  "success": true,
+  "projectFilePath": "/var/home/king/CS1 Mods/CSM.ExtraLandscapingTools/src/CSM.ExtraLandscapingTools/CSM.ExtraLandscapingTools.csproj",
+  "expectedPackageFiles": [
+    "/home/king/.nuget/packages/microsoft.netframework.referenceassemblies/1.0.3/microsoft.netframework.referenceassemblies.1.0.3.nupkg.sha512",
+    "/home/king/.nuget/packages/microsoft.netframework.referenceassemblies.net35/1.0.3/microsoft.netframework.referenceassemblies.net35.1.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

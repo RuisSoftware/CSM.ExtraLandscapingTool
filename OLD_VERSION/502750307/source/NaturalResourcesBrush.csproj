@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8CFB1C2F-A7FB-48CB-A281-7A9581DBC494}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NaturalResourcesBrush</RootNamespace>
+    <AssemblyName>NaturalResourcesBrush</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>C:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ColossalManaged">
+      <HintPath>C:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ColossalManaged.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ICities">
+      <HintPath>C:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\System.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>C:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="API\IEltPlugin.cs" />
+    <Compile Include="API\Plugins.cs" />
+    <Compile Include="Detours\BeautificationPanelDetour.cs" />
+    <Compile Include="Detours\BrushOptionPanelDetour.cs" />
+    <Compile Include="Detours\LevelHeightOptionPanelDetour.cs" />
+    <Compile Include="Options.cs" />
+    <Compile Include="Mod.cs" />
+    <Compile Include="Detours\LandscapingPanelDetour.cs" />
+    <Compile Include="Detours\TerrainPanelDetour.cs" />
+    <Compile Include="Detours\TerrainToolDetour.cs" />
+    <Compile Include="LoadingExtension.cs" />
+    <Compile Include="OptionsFramework\Attibutes\AbstractOptionsAttribute.cs" />
+    <Compile Include="OptionsFramework\Attibutes\ButtonAttribute.cs" />
+    <Compile Include="OptionsFramework\Attibutes\CheckboxAttribute.cs" />
+    <Compile Include="OptionsFramework\Attibutes\DontTranslateDescriptionAttribute.cs" />
+    <Compile Include="OptionsFramework\Attibutes\DropDownAttribute.cs" />
+    <Compile Include="OptionsFramework\Attibutes\HideConditionAttribute.cs" />
+    <Compile Include="OptionsFramework\Attibutes\LabelAttribute.cs" />
+    <Compile Include="OptionsFramework\Attibutes\OptionsAttribute.cs" />
+    <Compile Include="OptionsFramework\Attibutes\SliderAttribute.cs" />
+    <Compile Include="OptionsFramework\Attibutes\TextFieldAttribute.cs" />
+    <Compile Include="OptionsFramework\Extensions\CommonExtensions.cs" />
+    <Compile Include="OptionsFramework\Extensions\UIHelperBaseExtensions.cs" />
+    <Compile Include="OptionsFramework\OptionsWrapper.cs" />
+    <Compile Include="OptionsFramework\Util.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Detours\TreeToolDetour.cs" />
+    <Compile Include="RedirectionFramework\AssemblyRedirector.cs" />
+    <Compile Include="RedirectionFramework\Attributes\IgnoreConditionAttribute.cs" />
+    <Compile Include="RedirectionFramework\Attributes\IgnoreConditions\DisableAttribute.cs" />
+    <Compile Include="RedirectionFramework\Attributes\RedirectAttribute.cs" />
+    <Compile Include="RedirectionFramework\Attributes\RedirectMethodAttribute.cs" />
+    <Compile Include="RedirectionFramework\Attributes\RedirectReverseAttribute.cs" />
+    <Compile Include="RedirectionFramework\Attributes\TargetTypeAttribute.cs" />
+    <Compile Include="RedirectionFramework\Extensions\TypeExtension.cs" />
+    <Compile Include="RedirectionFramework\RedirectionHelper.cs" />
+    <Compile Include="RedirectionFramework\RedirectionUtil.cs" />
+    <Compile Include="RedirectionFramework\Redirector.cs" />
+    <Compile Include="RedirectionFramework\Tuple.cs" />
+    <Compile Include="TranslationFramework\Language.cs" />
+    <Compile Include="TranslationFramework\TranslatableAttribute.cs" />
+    <Compile Include="TranslationFramework\Translation.cs" />
+    <Compile Include="TranslationFramework\Util.cs" />
+    <Compile Include="UI.cs" />
+    <Compile Include="Detours\UndoTerrainOptionPanelDetour.cs" />
+    <Compile Include="NaturalResourcesBrush.cs" />
+    <Compile Include="Detours\WaterToolDetour.cs" />
+    <Compile Include="Utils\ToolbarButtonSpawner.cs" />
+    <Compile Include="Utils\UIUtil.cs" />
+    <Compile Include="Utils\Util.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\TerrainDitchPressed.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\TerrainDitchFocused.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\TerrainDitch.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\TerrainDitchHovered.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\TerrainDitchDisabled.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Locale\chinese.xml" />
+    <Content Include="Locale\english.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Locale\french.xml" />
+    <Content Include="Locale\italian.xml" />
+    <Content Include="Locale\korean.xml" />
+    <Content Include="Locale\simplified-chinese.xml" />
+    <Content Include="Locale\spanish.xml" />
+    <Content Include="Locale\traditional-chinese.xml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)"
+del "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\$(TargetFileName)"
+xcopy /y "$(TargetPath)" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)"
+mkdir "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"\Locale
+xcopy /y "$(ProjectDir)\Locale" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\Locale" /s /e
+</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

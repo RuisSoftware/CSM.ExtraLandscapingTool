@@ -1,0 +1,8 @@
+/var/home/king/CS1 Mods/CSM.ExtraLandscapingTools/src/CSM.ExtraLandscapingTools/obj/Release/net35/CSM.ExtraLandscapingTools.csproj.AssemblyReference.cache
+/var/home/king/CS1 Mods/CSM.ExtraLandscapingTools/src/CSM.ExtraLandscapingTools/obj/Release/net35/CSM.ExtraLandscapingTools.GeneratedMSBuildEditorConfig.editorconfig
+/var/home/king/CS1 Mods/CSM.ExtraLandscapingTools/src/CSM.ExtraLandscapingTools/obj/Release/net35/CSM.ExtraLandscapingTools.csproj.CoreCompileInputs.cache
+/var/home/king/CS1 Mods/CSM.ExtraLandscapingTools/src/CSM.ExtraLandscapingTools/obj/Release/net35/CSM.ExtraLandscapingTools.sourcelink.json
+/var/home/king/CS1 Mods/CSM.ExtraLandscapingTools/src/CSM.ExtraLandscapingTools/bin/Release/net35/CSM.ExtraLandscapingTools.dll
+/var/home/king/CS1 Mods/CSM.ExtraLandscapingTools/src/CSM.ExtraLandscapingTools/bin/Release/net35/CSM.ExtraLandscapingTools.pdb
+/var/home/king/CS1 Mods/CSM.ExtraLandscapingTools/src/CSM.ExtraLandscapingTools/obj/Release/net35/CSM.ExtraLandscapingTools.dll
+/var/home/king/CS1 Mods/CSM.ExtraLandscapingTools/src/CSM.ExtraLandscapingTools/obj/Release/net35/CSM.ExtraLandscapingTools.pdb

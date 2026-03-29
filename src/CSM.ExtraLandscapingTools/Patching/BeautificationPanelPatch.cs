@@ -55,7 +55,7 @@ namespace CSM.ExtraLandscapingTools.Patching
                     {
                         treeTool.m_brush = ToolsModifierControl.toolController.m_brushes[3];
                         treeTool.m_brushSize = 30;
-                        treeTool.m_mode = TreeTool.Mode.Single;
+                        treeTool.m_mode = TreeTool.Mode.Brush;
                     }
                     ShowBrushOptionsPanel(__instance);
                 }
@@ -81,9 +81,7 @@ namespace CSM.ExtraLandscapingTools.Patching
 
         private static void ShowBrushOptionsPanel(BeautificationPanel panel)
         {
-            var optionsBar = typeof(GeneratedGroupPanel)
-                .GetField("m_OptionsBar", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
-                ?.GetValue(panel) as UIComponent;
+            var optionsBar = UIView.Find<UIPanel>("OptionsBar");
 
             if (optionsBar != null && m_OptionsBrushPanel == null)
             {

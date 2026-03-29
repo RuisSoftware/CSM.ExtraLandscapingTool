@@ -291,18 +291,7 @@ namespace CSM.ExtraLandscapingTools.Mod
         {
             try
             {
-                var waterPanel = UIView.FindObjectOfType<WaterPanel>();
-                if (waterPanel != null)
-                {
-                    var buttons = waterPanel.GetComponentsInChildren<UIButton>();
-                    foreach (var button in buttons)
-                    {
-                        if (button.name == "PlaceWater")
-                            button.atlas = Util.CreateAtlasFromResources(new List<string> { "WaterPlaceWater" });
-                        if (button.name == "MoveSeaLevel")
-                            button.atlas = Util.CreateAtlasFromResources(new List<string> { "WaterMoveSeaLevel" });
-                    }
-                }
+                // WaterPanel buttons are now handled in WaterPanelPatch.RefreshPanelPostfix
 
                 if (mode == LoadMode.NewTheme || mode == LoadMode.LoadTheme)
                 {

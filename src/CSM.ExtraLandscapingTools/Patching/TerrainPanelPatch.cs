@@ -95,6 +95,13 @@ namespace CSM.ExtraLandscapingTools.Patching
         [HarmonyPostfix]
         public static void OnHideOptionBarsPostfix(TerrainPanel __instance)
         {
+            var optionsBar = UIView.Find<UIPanel>("OptionsBar");
+            if (optionsBar != null)
+            {
+                optionsBar.Find<UIPanel>("BrushPanel")?.Hide();
+                optionsBar.Find<UIPanel>("UndoTerrainPanel")?.Hide();
+                optionsBar.Find<UIPanel>("LevelHeightPanel")?.Hide();
+            }
             UIView.library.Hide("LandscapingInfoPanel");
         }
 

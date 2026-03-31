@@ -1,0 +1,3 @@
+/var/home/king/CS1 Mods/CSM.ExtraLandscapingTools/src/CSM.ExtraLandscapingTools/obj/Debug/net35/CSM.ExtraLandscapingTools.GeneratedMSBuildEditorConfig.editorconfig
+/var/home/king/CS1 Mods/CSM.ExtraLandscapingTools/src/CSM.ExtraLandscapingTools/obj/Debug/net35/CSM.ExtraLandscapingTools.csproj.CoreCompileInputs.cache
+/var/home/king/CS1 Mods/CSM.ExtraLandscapingTools/src/CSM.ExtraLandscapingTools/obj/Debug/net35/CSM.ExtraLandscapingTools.sourcelink.json

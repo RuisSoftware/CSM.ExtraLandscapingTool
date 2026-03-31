@@ -16,7 +16,8 @@ namespace CSM.ExtraLandscapingTools.Mod
     {
         private const string LandscapingInfoPanel = "LandscapingInfoPanel";
         private static UIDynamicPanels.DynamicPanelInfo landscapingPanel;
-        private static Dictionary<UIComponent, bool> beautificationPanelsCachedVisible = new Dictionary<UIComponent, bool>();
+        private static Dictionary<UIComponent, bool> panelsCachedVisible = new Dictionary<UIComponent, bool>();
+        private static PropertyChangedEventHandler<bool> m_panelVisibilityHandler;
 
         public override void OnCreated(ILoading loading)
         {
@@ -78,13 +79,42 @@ namespace CSM.ExtraLandscapingTools.Mod
                 }
             }
 
-            // Beautification panel event handlers
-            var beautificationPanels = Object.FindObjectsOfType<BeautificationPanel>();
-            beautificationPanels.ForEach(p =>
+            // Panel event handlers to hide Brush Options Panel when switching tools
+            if (m_panelVisibilityHandler == null)
             {
-                p.component.eventVisibilityChanged -= HideBrushOptionsPanel();
-                p.component.eventVisibilityChanged += HideBrushOptionsPanel();
-            });
+                m_panelVisibilityHandler = HideBrushOptionsPanel();
+            }
+
+            foreach (var p in Object.FindObjectsOfType<BeautificationPanel>())
+            {
+                p.component.eventVisibilityChanged -= m_panelVisibilityHandler;
+                p.component.eventVisibilityChanged += m_panelVisibilityHandler;
+            }
+            foreach (var p in Object.FindObjectsOfType<SurfacePanel>())
+            {
+                p.component.eventVisibilityChanged -= m_panelVisibilityHandler;
+                p.component.eventVisibilityChanged += m_panelVisibilityHandler;
+            }
+            foreach (var p in Object.FindObjectsOfType<WaterPanel>())
+            {
+                p.component.eventVisibilityChanged -= m_panelVisibilityHandler;
+                p.component.eventVisibilityChanged += m_panelVisibilityHandler;
+            }
+            foreach (var p in Object.FindObjectsOfType<TerrainPanel>())
+            {
+                p.component.eventVisibilityChanged -= m_panelVisibilityHandler;
+                p.component.eventVisibilityChanged += m_panelVisibilityHandler;
+            }
+            foreach (var p in Object.FindObjectsOfType<ResourcePanel>())
+            {
+                p.component.eventVisibilityChanged -= m_panelVisibilityHandler;
+                p.component.eventVisibilityChanged += m_panelVisibilityHandler;
+            }
+            foreach (var p in Object.FindObjectsOfType<LandscapingPanel>())
+            {
+                p.component.eventVisibilityChanged -= m_panelVisibilityHandler;
+                p.component.eventVisibilityChanged += m_panelVisibilityHandler;
+            }
 
             // Surface: update whole map after loading
             if (mode == LoadMode.LoadGame || mode == LoadMode.NewGame)
@@ -101,12 +131,16 @@ namespace CSM.ExtraLandscapingTools.Mod
                 GetPanels().Add(LandscapingInfoPanel, landscapingPanel);
             }
             landscapingPanel = null;
-            beautificationPanelsCachedVisible.Clear();
-            var beautificationPanels = Object.FindObjectsOfType<BeautificationPanel>();
-            beautificationPanels.ForEach(p =>
+            panelsCachedVisible.Clear();
+            if (m_panelVisibilityHandler != null)
             {
-                p.component.eventVisibilityChanged -= HideBrushOptionsPanel();
-            });
+                foreach (var p in Object.FindObjectsOfType<BeautificationPanel>()) { p.component.eventVisibilityChanged -= m_panelVisibilityHandler; }
+                foreach (var p in Object.FindObjectsOfType<SurfacePanel>()) { p.component.eventVisibilityChanged -= m_panelVisibilityHandler; }
+                foreach (var p in Object.FindObjectsOfType<WaterPanel>()) { p.component.eventVisibilityChanged -= m_panelVisibilityHandler; }
+                foreach (var p in Object.FindObjectsOfType<TerrainPanel>()) { p.component.eventVisibilityChanged -= m_panelVisibilityHandler; }
+                foreach (var p in Object.FindObjectsOfType<ResourcePanel>()) { p.component.eventVisibilityChanged -= m_panelVisibilityHandler; }
+                foreach (var p in Object.FindObjectsOfType<LandscapingPanel>()) { p.component.eventVisibilityChanged -= m_panelVisibilityHandler; }
+            }
         }
 
         #region Tool Setup
@@ -187,6 +221,7 @@ namespace CSM.ExtraLandscapingTools.Mod
 
         private static void SetUpWaterTool(ICollection<ToolBase> extraTools)
         {
+            var optionsPanel = SetupWaterPanel();
             var waterTool = ToolsModifierControl.GetTool<WaterTool>();
             if (waterTool != null) return;
             waterTool = ToolsModifierControl.toolController.gameObject.AddComponent<WaterTool>();
@@ -694,12 +729,12 @@ namespace CSM.ExtraLandscapingTools.Mod
         {
             return (sender, visible) =>
             {
-                if (beautificationPanelsCachedVisible.TryGetValue(sender, out bool cached) && cached && !visible)
+                if (panelsCachedVisible.TryGetValue(sender, out bool cached) && cached && !visible)
                 {
                     var optionsPanel = Object.FindObjectOfType<BrushOptionPanel>();
                     optionsPanel?.Hide();
                 }
-                beautificationPanelsCachedVisible[sender] = visible;
+                panelsCachedVisible[sender] = visible;
             };
         }
 

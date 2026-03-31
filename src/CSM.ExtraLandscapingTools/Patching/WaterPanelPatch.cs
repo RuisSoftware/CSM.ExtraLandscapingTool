@@ -11,10 +11,13 @@ namespace CSM.ExtraLandscapingTools.Patching
     /// <summary>
     /// Patches WaterPanel to add Map Editor water tools (Water Source, Sea Level) to the in-game UI.
     /// </summary>
+    [HarmonyPatch(typeof(WaterPanel))]
     public static class WaterPanelPatch
     {
         private static UIPanel m_OptionsWaterPanel;
 
+        [HarmonyPatch("RefreshPanel")]
+        [HarmonyPostfix]
         public static void RefreshPanelPostfix(GeneratedGroupPanel __instance)
         {
             if (__instance == null || __instance.name != "Water")
@@ -101,6 +104,11 @@ namespace CSM.ExtraLandscapingTools.Patching
                     {
                         placeBtn.atlas = atlas;
                         placeBtn.tooltip = placeWaterTooltip;
+                        placeBtn.normalFgSprite = "WaterPlaceWater";
+                        placeBtn.hoveredFgSprite = "WaterPlaceWaterHovered";
+                        placeBtn.pressedFgSprite = "WaterPlaceWaterPressed";
+                        placeBtn.disabledFgSprite = "WaterPlaceWaterDisabled";
+                        placeBtn.focusedFgSprite = "WaterPlaceWaterFocused";
                         Log.Info("Added PlaceWater button (simple).");
                     }
 
@@ -109,6 +117,11 @@ namespace CSM.ExtraLandscapingTools.Patching
                     {
                         seaLevelBtn.atlas = atlas;
                         seaLevelBtn.tooltip = moveSeaLevelTooltip;
+                        seaLevelBtn.normalFgSprite = "WaterMoveSeaLevel";
+                        seaLevelBtn.hoveredFgSprite = "WaterMoveSeaLevelHovered";
+                        seaLevelBtn.pressedFgSprite = "WaterMoveSeaLevelPressed";
+                        seaLevelBtn.disabledFgSprite = "WaterMoveSeaLevelDisabled";
+                        seaLevelBtn.focusedFgSprite = "WaterMoveSeaLevelFocused";
                         Log.Info("Added MoveSeaLevel button (simple).");
                     }
                 }
@@ -119,6 +132,8 @@ namespace CSM.ExtraLandscapingTools.Patching
             }
         }
 
+        [HarmonyPatch("OnButtonClicked")]
+        [HarmonyPrefix]
         public static bool OnButtonClickedPrefix(GeneratedGroupPanel __instance, UIComponent comp)
         {
             if (__instance == null || __instance.name != "Water")
@@ -138,6 +153,13 @@ namespace CSM.ExtraLandscapingTools.Patching
                 {
                     Util.SetPrivate(waterTool, "m_PlaceWater", false);
                     Util.SetPrivate(waterTool, "m_MoveSeaLevel", true);
+                }
+
+                var optionsBar = UIView.Find<UIPanel>("OptionsBar");
+                if (optionsBar != null)
+                {
+                    var brushPanel = optionsBar.Find<UIPanel>("BrushPanel");
+                    brushPanel?.Hide();
                 }
 
                 ShowWaterOptionsPanel(__instance);

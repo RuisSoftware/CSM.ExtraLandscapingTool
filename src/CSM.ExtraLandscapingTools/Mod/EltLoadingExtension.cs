@@ -566,47 +566,85 @@ namespace CSM.ExtraLandscapingTools.Mod
             waterPanel.backgroundSprite = "MenuPanel2";
             waterPanel.size = new Vector2(231, 230);
             waterPanel.isVisible = false;
-            waterPanel.relativePosition = new Vector3(-256, -166);
+            waterPanel.relativePosition = new Vector3(-256, -260); // Positioned above options bar
 
             UIUtil.SetupTitle("Water Options", waterPanel);
             SetupWaterCapacityPanel(waterPanel);
+            
             return waterPanel.gameObject.AddComponent<WaterOptionPanel>();
         }
 
         private static void SetupWaterCapacityPanel(UIComponent waterOptionsPanel)
         {
-            var waterCapacityPanel = waterOptionsPanel.AddUIComponent<UIPanel>();
-            waterCapacityPanel.size = new Vector2(231, 78);
-            waterCapacityPanel.relativePosition = new Vector2(0, 40);
-            waterCapacityPanel.name = "Settings";
-            var waterCapacityLabel = waterCapacityPanel.AddUIComponent<UILabel>();
-            waterCapacityLabel.localeID = "MAPEDITOR_WATERCAPACITY";
-            waterCapacityLabel.size = new Vector2(137, 16);
-            waterCapacityLabel.relativePosition = new Vector3(10, 16);
+            // Capacity group
+            var capacityGroup = waterOptionsPanel.AddUIComponent<UIPanel>();
+            capacityGroup.name = "CapacityGroup";
+            capacityGroup.size = new Vector2(231, 60);
+            capacityGroup.relativePosition = new Vector2(0, 40);
+            
+            var capacityLabel = capacityGroup.AddUIComponent<UILabel>();
+            capacityLabel.localeID = "MAPEDITOR_WATERCAPACITY";
+            capacityLabel.size = new Vector2(137, 16);
+            capacityLabel.relativePosition = new Vector3(10, 10);
 
-            var waterCapacityText = waterCapacityPanel.AddUIComponent<UITextField>();
-            waterCapacityText.name = "Capacity";
-            waterCapacityText.size = new Vector2(64, 18);
-            waterCapacityText.normalBgSprite = "TextFieldPanel";
-            waterCapacityText.builtinKeyNavigation = true;
-            waterCapacityText.isInteractive = true;
-            waterCapacityText.readOnly = false;
-            waterCapacityText.selectionSprite = "EmptySprite";
-            waterCapacityText.selectionBackgroundColor = new Color32(0, 172, 234, 255);
-            waterCapacityText.relativePosition = new Vector3(150, 16, 0);
+            var capacityText = capacityGroup.AddUIComponent<UITextField>();
+            capacityText.name = "CapacityText";
+            capacityText.size = new Vector2(64, 18);
+            capacityText.normalBgSprite = "TextFieldPanel";
+            capacityText.relativePosition = new Vector3(150, 10);
+            capacityText.builtinKeyNavigation = true;
+            capacityText.isInteractive = true;
+            capacityText.readOnly = false;
+            capacityText.selectionSprite = "EmptySprite";
+            capacityText.selectionBackgroundColor = new Color32(0, 172, 234, 255);
 
-            var waterCapacitySlider = waterCapacityPanel.AddUIComponent<UISlider>();
-            waterCapacitySlider.name = "Capacity";
-            waterCapacitySlider.relativePosition = new Vector3(28, 39, 0);
-            waterCapacitySlider.backgroundSprite = "ScrollbarTrack";
-            waterCapacitySlider.size = new Vector2(174, 12);
-            waterCapacitySlider.minValue = 0.0001f;
-            waterCapacitySlider.maxValue = 1;
-            waterCapacitySlider.stepSize = 0.0001f;
-            var waterCapacitySliderThumb = waterCapacitySlider.AddUIComponent<UISlicedSprite>();
-            waterCapacitySliderThumb.spriteName = "ScrollbarThumb";
-            waterCapacitySliderThumb.size = new Vector2(10, 20);
-            waterCapacitySlider.thumbObject = waterCapacitySliderThumb;
+            var capacitySlider = capacityGroup.AddUIComponent<UISlider>();
+            capacitySlider.name = "CapacitySlider";
+            capacitySlider.relativePosition = new Vector3(28, 35);
+            capacitySlider.backgroundSprite = "ScrollbarTrack";
+            capacitySlider.size = new Vector2(174, 12);
+            capacitySlider.minValue = 0.0001f;
+            capacitySlider.maxValue = 1f;
+            capacitySlider.stepSize = 0.0001f;
+            var capacityThumb = capacitySlider.AddUIComponent<UISlicedSprite>();
+            capacityThumb.spriteName = "ScrollbarThumb";
+            capacityThumb.size = new Vector2(10, 20);
+            capacitySlider.thumbObject = capacityThumb;
+
+            // Height group
+            var heightGroup = waterOptionsPanel.AddUIComponent<UIPanel>();
+            heightGroup.name = "HeightGroup";
+            heightGroup.size = new Vector2(231, 60);
+            heightGroup.relativePosition = new Vector2(0, 100);
+
+            var heightLabel = heightGroup.AddUIComponent<UILabel>();
+            heightLabel.text = "Height"; // Or MAPEDITOR_TERRAINLEVEL if available
+            heightLabel.size = new Vector2(137, 16);
+            heightLabel.relativePosition = new Vector3(10, 10);
+
+            var heightText = heightGroup.AddUIComponent<UITextField>();
+            heightText.name = "HeightText";
+            heightText.size = new Vector2(64, 18);
+            heightText.normalBgSprite = "TextFieldPanel";
+            heightText.relativePosition = new Vector3(150, 10);
+            heightText.builtinKeyNavigation = true;
+            heightText.isInteractive = true;
+            heightText.readOnly = false;
+            heightText.selectionSprite = "EmptySprite";
+            heightText.selectionBackgroundColor = new Color32(0, 172, 234, 255);
+
+            var heightSlider = heightGroup.AddUIComponent<UISlider>();
+            heightSlider.name = "HeightSlider";
+            heightSlider.relativePosition = new Vector3(28, 35);
+            heightSlider.backgroundSprite = "ScrollbarTrack";
+            heightSlider.size = new Vector2(174, 12);
+            heightSlider.minValue = 0f;
+            heightSlider.maxValue = 1000f;
+            heightSlider.stepSize = 0.01f;
+            var heightThumb = heightSlider.AddUIComponent<UISlicedSprite>();
+            heightThumb.spriteName = "ScrollbarThumb";
+            heightThumb.size = new Vector2(10, 20);
+            heightSlider.thumbObject = heightThumb;
 
             // Tool selection buttons
             var atlas = Util.CreateAtlasFromResources(new List<string> { "WaterPlaceWater", "WaterMoveSeaLevel" });
@@ -618,7 +656,7 @@ namespace CSM.ExtraLandscapingTools.Mod
             placeWaterBtn.hoveredFgSprite = "WaterPlaceWaterHovered";
             placeWaterBtn.pressedFgSprite = "WaterPlaceWaterPressed";
             placeWaterBtn.size = new Vector2(36, 36);
-            placeWaterBtn.relativePosition = new Vector2(74, 130);
+            placeWaterBtn.relativePosition = new Vector2(74, 160);
             placeWaterBtn.tooltip = "Water Creator Tool";
 
             var moveSeaLevelBtn = waterOptionsPanel.AddUIComponent<UIButton>();
@@ -628,14 +666,14 @@ namespace CSM.ExtraLandscapingTools.Mod
             moveSeaLevelBtn.hoveredFgSprite = "WaterMoveSeaLevelHovered";
             moveSeaLevelBtn.pressedFgSprite = "WaterMoveSeaLevelPressed";
             moveSeaLevelBtn.size = new Vector2(36, 36);
-            moveSeaLevelBtn.relativePosition = new Vector2(120, 130);
+            moveSeaLevelBtn.relativePosition = new Vector2(120, 160);
             moveSeaLevelBtn.tooltip = "Sea Level Editor Tool";
 
             var resetButton = waterOptionsPanel.AddUIComponent<UIButton>();
             resetButton.name = "Apply";
-            resetButton.localeID = "MAPEDITOR_RESET_WATER";
+            resetButton.localeID = "MAPEDITOR_RESET_WATER"; // Or custom string Reset Water
             resetButton.size = new Vector2(191, 38);
-            resetButton.relativePosition = new Vector3(20, 175);
+            resetButton.relativePosition = new Vector3(20, 205);
             resetButton.eventClick += (component, eventParam) =>
             {
                 ColossalFramework.Singleton<TerrainManager>.instance.WaterSimulation.m_resetWater = true;

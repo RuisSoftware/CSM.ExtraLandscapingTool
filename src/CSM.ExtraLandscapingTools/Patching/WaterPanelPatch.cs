@@ -164,6 +164,8 @@ namespace CSM.ExtraLandscapingTools.Patching
 
                 ShowWaterOptionsPanel(__instance);
                 UIView.library.Show("WaterInfoPanel");
+                // Hide the sub-menu strip of icons to focus on the options panel
+                typeof(UIComponent).GetMethod("Hide").Invoke(__instance, null);
                 return false;
             }
 

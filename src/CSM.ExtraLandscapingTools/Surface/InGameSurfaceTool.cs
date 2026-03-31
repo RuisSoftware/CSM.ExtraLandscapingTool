@@ -14,6 +14,8 @@ namespace CSM.ExtraLandscapingTools.Surface
         private bool m_mouseLeftDown;
         private bool m_mouseRightDown;
         internal Mode m_mode;
+        private int m_frameCounter = 0;
+        private Vector3 m_lastSentPosition;
 
         protected override void OnToolGUI(UnityEngine.Event e)
         {
@@ -70,6 +72,18 @@ namespace CSM.ExtraLandscapingTools.Surface
                 this.m_toolController.SetBrush(this.m_brush, this.m_mousePosition, this.m_brushSize);
             else
                 this.m_toolController.SetBrush((Texture2D)null, Vector3.zero, 1f);
+
+            // CSM Cursor Sync
+            m_frameCounter++;
+            if (m_frameCounter >= 2) // Sync every 2 frames if moved
+            {
+                m_frameCounter = 0;
+                if (Vector3.Distance(m_mousePosition, m_lastSentPosition) > 0.5f)
+                {
+                    CSM.CsmBridge.SendToolCursor(m_mousePosition, m_brushSize, "SurfaceTool");
+                    m_lastSentPosition = m_mousePosition;
+                }
+            }
         }
 
         public override void SimulationStep()

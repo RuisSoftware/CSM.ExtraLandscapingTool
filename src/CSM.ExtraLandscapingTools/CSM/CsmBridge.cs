@@ -1,5 +1,6 @@
 using System;
 using CSM.API.Commands;
+using UnityEngine;
 using CSM.API.Helpers;
 using CSM.ExtraLandscapingTools.Surface;
 
@@ -51,6 +52,70 @@ namespace CSM.ExtraLandscapingTools.CSM
                 MinZ = minZ,
                 MaxX = maxX,
                 MaxZ = maxZ
+            };
+            SendToAll(cmd);
+        }
+
+        /// <summary>
+        /// Called from UIInjections and handlers to sync water tool changes.
+        /// </summary>
+        internal static void SendWaterCommand(bool resetWater, float capacity, bool placeWater, bool moveSeaLevel)
+        {
+            if (IsIgnoring()) return;
+            if (Command.SendToAll == null) return;
+
+            var cmd = new WaterCommand
+            {
+                ResetWater = resetWater,
+                Capacity = capacity,
+                PlaceWater = placeWater,
+                MoveSeaLevel = moveSeaLevel
+            };
+            SendToAll(cmd);
+        }
+
+        internal static void SendResourcePaint(int[] cellData, NaturalResourceManager.Resource type, byte amount)
+        {
+            if (IsIgnoring()) return;
+            if (Command.SendToAll == null) return;
+
+            var cmd = new ResourceCommand
+            {
+                CellData = cellData,
+                ResourceType = type,
+                Amount = amount
+            };
+            SendToAll(cmd);
+        }
+
+        internal static void SendWaterSource(WaterSourceAction action, int index, Vector3 pos, float level, float flow, ushort type)
+        {
+            if (IsIgnoring()) return;
+            if (Command.SendToAll == null) return;
+
+            var cmd = new WaterSourceCommand
+            {
+                Action = action,
+                SourceIndex = index,
+                Position = pos,
+                TargetWaterLevel = level,
+                MaxFlow = flow,
+                Type = type
+            };
+            SendToAll(cmd);
+        }
+
+        internal static void SendToolCursor(Vector3 pos, float size, string toolName)
+        {
+            if (IsIgnoring()) return;
+            if (Command.SendToAll == null) return;
+
+            var cmd = new ToolCursorCommand
+            {
+                MousePosition = pos,
+                BrushSize = size,
+                ToolName = toolName,
+                PlayerID = 0 // Will be handled on receipt or we can add a local ID if available
             };
             SendToAll(cmd);
         }

@@ -564,9 +564,9 @@ namespace CSM.ExtraLandscapingTools.Mod
             var waterPanel = optionsBar.AddUIComponent<UIPanel>();
             waterPanel.name = "WaterPanel";
             waterPanel.backgroundSprite = "MenuPanel2";
-            waterPanel.size = new Vector2(231, 230);
+            waterPanel.size = new Vector2(231, 170);
             waterPanel.isVisible = false;
-            waterPanel.relativePosition = new Vector3(-256, -260); // Positioned above options bar
+            waterPanel.relativePosition = new Vector3(-256, -200); // Positioned above options bar
 
             UIUtil.SetupTitle("Water Options", waterPanel);
             SetupWaterCapacityPanel(waterPanel);
@@ -611,41 +611,6 @@ namespace CSM.ExtraLandscapingTools.Mod
             capacityThumb.size = new Vector2(10, 20);
             capacitySlider.thumbObject = capacityThumb;
 
-            // Height group
-            var heightGroup = waterOptionsPanel.AddUIComponent<UIPanel>();
-            heightGroup.name = "HeightGroup";
-            heightGroup.size = new Vector2(231, 60);
-            heightGroup.relativePosition = new Vector2(0, 100);
-
-            var heightLabel = heightGroup.AddUIComponent<UILabel>();
-            heightLabel.text = "Height"; // Or MAPEDITOR_TERRAINLEVEL if available
-            heightLabel.size = new Vector2(137, 16);
-            heightLabel.relativePosition = new Vector3(10, 10);
-
-            var heightText = heightGroup.AddUIComponent<UITextField>();
-            heightText.name = "HeightText";
-            heightText.size = new Vector2(64, 18);
-            heightText.normalBgSprite = "TextFieldPanel";
-            heightText.relativePosition = new Vector3(150, 10);
-            heightText.builtinKeyNavigation = true;
-            heightText.isInteractive = true;
-            heightText.readOnly = false;
-            heightText.selectionSprite = "EmptySprite";
-            heightText.selectionBackgroundColor = new Color32(0, 172, 234, 255);
-
-            var heightSlider = heightGroup.AddUIComponent<UISlider>();
-            heightSlider.name = "HeightSlider";
-            heightSlider.relativePosition = new Vector3(28, 35);
-            heightSlider.backgroundSprite = "ScrollbarTrack";
-            heightSlider.size = new Vector2(174, 12);
-            heightSlider.minValue = 0f;
-            heightSlider.maxValue = 1000f;
-            heightSlider.stepSize = 0.01f;
-            var heightThumb = heightSlider.AddUIComponent<UISlicedSprite>();
-            heightThumb.spriteName = "ScrollbarThumb";
-            heightThumb.size = new Vector2(10, 20);
-            heightSlider.thumbObject = heightThumb;
-
             // Tool selection buttons
             var atlas = Util.CreateAtlasFromResources(new List<string> { "WaterPlaceWater", "WaterMoveSeaLevel" });
 
@@ -655,8 +620,9 @@ namespace CSM.ExtraLandscapingTools.Mod
             placeWaterBtn.normalFgSprite = "WaterPlaceWater";
             placeWaterBtn.hoveredFgSprite = "WaterPlaceWaterHovered";
             placeWaterBtn.pressedFgSprite = "WaterPlaceWaterPressed";
+            placeWaterBtn.focusedFgSprite = "WaterPlaceWaterFocused";
             placeWaterBtn.size = new Vector2(36, 36);
-            placeWaterBtn.relativePosition = new Vector2(74, 160);
+            placeWaterBtn.relativePosition = new Vector2(74, 90);
             placeWaterBtn.tooltip = "Water Creator Tool";
 
             var moveSeaLevelBtn = waterOptionsPanel.AddUIComponent<UIButton>();
@@ -665,19 +631,16 @@ namespace CSM.ExtraLandscapingTools.Mod
             moveSeaLevelBtn.normalFgSprite = "WaterMoveSeaLevel";
             moveSeaLevelBtn.hoveredFgSprite = "WaterMoveSeaLevelHovered";
             moveSeaLevelBtn.pressedFgSprite = "WaterMoveSeaLevelPressed";
+            moveSeaLevelBtn.focusedFgSprite = "WaterMoveSeaLevelFocused";
             moveSeaLevelBtn.size = new Vector2(36, 36);
-            moveSeaLevelBtn.relativePosition = new Vector2(120, 160);
+            moveSeaLevelBtn.relativePosition = new Vector2(120, 90);
             moveSeaLevelBtn.tooltip = "Sea Level Editor Tool";
 
             var resetButton = waterOptionsPanel.AddUIComponent<UIButton>();
             resetButton.name = "Apply";
             resetButton.localeID = "MAPEDITOR_RESET_WATER"; // Or custom string Reset Water
             resetButton.size = new Vector2(191, 38);
-            resetButton.relativePosition = new Vector3(20, 205);
-            resetButton.eventClick += (component, eventParam) =>
-            {
-                ColossalFramework.Singleton<TerrainManager>.instance.WaterSimulation.m_resetWater = true;
-            };
+            resetButton.relativePosition = new Vector3(20, 128);
             resetButton.normalBgSprite = "ButtonMenu";
             resetButton.hoveredBgSprite = "ButtonMenuHovered";
             resetButton.pressedBgSprite = "ButtonMenuPressed";

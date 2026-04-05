@@ -311,7 +311,7 @@ namespace CSM.ExtraLandscapingTools.Patching
                     strokeZmax = Math.Max(strokeZmax, val2_1);
                 }
             }
-            TerrainModify.UpdateArea(minX, minZ, maxX, maxZ, true, false, false);
+            TerrainModify.UpdateArea(minX, minZ, maxX, maxZ, true, true, false);
 
             // Sync terrain heights to other multiplayer clients
             int count = (maxX - minX + 1) * (maxZ - minZ + 1);
@@ -409,7 +409,7 @@ namespace CSM.ExtraLandscapingTools.Patching
                 int mX = us.xmin;
                 while (mX <= us.xmax)
                 {
-                    TerrainModify.UpdateArea(mX, mZ, mX + num, mZ + num, true, false, false);
+                    TerrainModify.UpdateArea(mX, mZ, mX + num, mZ + num, true, true, false);
                     mX += num + 1;
                 }
                 mZ += num + 1;

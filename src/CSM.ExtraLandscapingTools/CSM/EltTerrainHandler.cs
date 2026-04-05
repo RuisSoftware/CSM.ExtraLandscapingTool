@@ -22,7 +22,7 @@ namespace CSM.ExtraLandscapingTools.CSM
                     }
                 }
 
-                TerrainModify.UpdateArea(command.MinX, command.MinZ, command.MaxX, command.MaxZ, true, false, false);
+                TerrainModify.UpdateArea(command.MinX, command.MinZ, command.MaxX, command.MaxZ, true, true, false);
             }
         }
     }

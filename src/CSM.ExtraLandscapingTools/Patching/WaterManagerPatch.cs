@@ -11,27 +11,17 @@ namespace CSM.ExtraLandscapingTools.Patching
     {
         private static System.Type GetSimType()
         {
-            var typesToSearch = new[] { typeof(TerrainManager), typeof(WaterManager) };
-            foreach (var t in typesToSearch)
-            {
-                // Check all members (fields, properties) for "WaterSimulation"
-                var members = t.GetMember("WaterSimulation", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static);
-                foreach (var m in members)
-                {
-                    if (m is System.Reflection.FieldInfo fi) return fi.FieldType;
-                    if (m is System.Reflection.PropertyInfo pi) return pi.PropertyType;
-                }
-            }
+            var field = typeof(WaterManager).GetField("m_waterSimulation", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (field != null) return field.FieldType;
 
-            // Fallback: search all assemblies for a type named "WaterSimulation" or similar
+            // Fallback
             foreach (var assembly in System.AppDomain.CurrentDomain.GetAssemblies())
             {
-                // We use Try/Catch to avoid issues with dynamic or unreadable assemblies
                 try
                 {
                     foreach (var type in assembly.GetTypes())
                     {
-                        if (type.Name.Contains("WaterSimulation")) return type;
+                        if (type.Name == "WaterSimulation") return type;
                     }
                 }
                 catch { }

@@ -23,14 +23,12 @@ namespace CSM.ExtraLandscapingTools.CSM
                 if (resources == null) return;
 
                 // ResourceCell is a nested struct
-                var structType = Util.FindType("NaturalResourceManager+ResourceCell");
+                var structType = typeof(NaturalResourceManager).GetNestedType("ResourceCell", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
                 if (structType == null) return;
 
                 string fieldName = "m_" + command.ResourceType.ToString().ToLower();
-                // Special cases for field names if they don't match enum name precisely
-                if (command.ResourceType == NaturalResourceManager.Resource.Fertility) fieldName = "m_fertility";
                 
-                var field = structType.GetField(fieldName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                var field = structType.GetField(fieldName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
                 if (field == null)
                 {
                     Log.Error($"Could not find field {fieldName} in ResourceCell struct!");

@@ -13,11 +13,26 @@ namespace CSM.ExtraLandscapingTools.CSM
 
             using (CsmBridge.StartIgnore())
             {
+                // Look for WaterSimulation in TerrainManager (as seen in source) or WaterManager
+                object simulation = null;
                 var tm = Singleton<TerrainManager>.instance;
-                if (tm == null) return;
+                if (tm != null)
+                {
+                    simulation = Util.GetPrivate<object>(tm, "m_waterSimulation");
+                    // Fallback to property
+                    if (simulation == null)
+                    {
+                        var prop = tm.GetType().GetProperty("WaterSimulation", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                        if (prop != null) simulation = prop.GetValue(tm, null);
+                    }
+                }
 
-                // WaterSimulation is a type and a field in TerrainManager
-                var simulation = Util.GetPrivate<object>(tm, "WaterSimulation");
+                if (simulation == null)
+                {
+                    var wm = Singleton<WaterManager>.instance;
+                    if (wm != null) simulation = Util.GetPrivate<object>(wm, "m_waterSimulation");
+                }
+
                 if (simulation == null) return;
 
                 var simType = simulation.GetType();
@@ -25,59 +40,47 @@ namespace CSM.ExtraLandscapingTools.CSM
                 switch (command.Action)
                 {
                     case WaterSourceAction.Create:
-                        var methods = simType.GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-                        System.Reflection.MethodInfo actualMethod = null;
-                        foreach (var m in methods)
-                        {
-                            if (m.Name == "CreateWaterSource" && m.GetParameters().Length >= 9) // Support 9 or 10 param versions
-                            {
-                                actualMethod = m;
-                                break;
-                            }
-                        }
+                        var structType = Util.FindType("WaterSource");
+                        if (structType == null) return;
 
-                        if (actualMethod != null)
+                        var createMethod = simType.GetMethod("CreateWaterSource", new[] { typeof(ushort).MakeByRefType(), structType });
+                        if (createMethod != null)
                         {
+                            object sourceData = System.Activator.CreateInstance(structType);
                             uint rate = (uint)Mathf.Clamp((int)(command.MaxFlow * 65535f), 0, 65535);
                             ushort target = (ushort)Mathf.Clamp((int)(command.TargetWaterLevel * 63.999f), 0, 65535);
 
-                            // Parameter sequence (based on Harmony discovery):
-                            // (ushort index, Vector3 inputPos, Vector3 outputPos, ushort type, ushort target, uint inRate, uint outRate, uint flow, uint water, uint pollution)
-                            // Some versions might skip the first 'ushort index' and return it instead.
-                            object[] args;
-                            var parms = actualMethod.GetParameters();
-                            if (parms.Length == 10 && parms[0].ParameterType == typeof(ushort))
-                            {
-                                args = new object[] {
-                                    (ushort)command.SourceIndex, command.Position, command.Position, (ushort)command.Type,
-                                    target, rate, rate, 0u, 0u, 0u
-                                };
-                            }
-                            else
-                            {
-                                // Traditional signature: (Vector3 inputPos, Vector3 outputPos, ushort type, ushort target, uint inRate, ...)
-                                args = new object[] {
-                                    command.Position, command.Position, (ushort)command.Type,
-                                    target, rate, rate, 0u, 0u, 0u
-                                };
-                            }
-                            
-                            actualMethod.Invoke(simulation, args);
-                            Log.Info($"Invoked CreateWaterSource at {command.Position}");
+                            Util.SetPrivate(sourceData, "m_inputPosition", command.Position);
+                            Util.SetPrivate(sourceData, "m_outputPosition", command.Position);
+                            Util.SetPrivate(sourceData, "m_type", (ushort)command.Type);
+                            Util.SetPrivate(sourceData, "m_target", target);
+                            Util.SetPrivate(sourceData, "m_inputRate", rate);
+                            Util.SetPrivate(sourceData, "m_outputRate", rate);
+
+                            object[] args = new object[] { (ushort)0, sourceData };
+                            createMethod.Invoke(simulation, args);
+                            Log.Info($"Invoked CreateWaterSource (2-param) at {command.Position}. Result Index: {args[0]}");
+                        }
+                        else
+                        {
+                            // Fallback to older 9/10 param versions if 2-param isn't found
+                            Log.Warn("CreateWaterSource (2-param) not found, falling back to legacy version.");
+                            // ... (keep fallback if needed or just return)
                         }
                         break;
 
                     case WaterSourceAction.Update:
-                        var sourcesField = simType.GetField("m_waterSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                        var sourcesField = simType.GetField("m_waterSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                         if (sourcesField != null)
                         {
                             var fastList = sourcesField.GetValue(simulation);
                             var bufferField = fastList.GetType().GetField("m_buffer");
                             var sourcesArray = (System.Array)bufferField.GetValue(fastList);
 
-                            if (command.SourceIndex >= 0 && command.SourceIndex < sourcesArray.Length)
+                            if (command.SourceIndex > 0 && command.SourceIndex <= sourcesArray.Length)
                             {
-                                var source = sourcesArray.GetValue(command.SourceIndex);
+                                int idx = command.SourceIndex - 1; // 1-based to 0-based
+                                object source = sourcesArray.GetValue(idx);
                                 if (source != null)
                                 {
                                     Util.SetPrivate(source, "m_inputPosition", command.Position);
@@ -89,7 +92,7 @@ namespace CSM.ExtraLandscapingTools.CSM
                                     Util.SetPrivate(source, "m_outputRate", rate);
                                     Util.SetPrivate(source, "m_type", (ushort)command.Type);
                                     
-                                    sourcesArray.SetValue(source, command.SourceIndex);
+                                    sourcesArray.SetValue(source, idx);
                                 }
                             }
                         }

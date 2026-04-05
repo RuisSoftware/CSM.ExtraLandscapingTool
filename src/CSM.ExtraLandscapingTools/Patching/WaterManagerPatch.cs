@@ -11,23 +11,26 @@ namespace CSM.ExtraLandscapingTools.Patching
     {
         private static System.Type GetSimType()
         {
-            var field = typeof(WaterManager).GetField("m_waterSimulation", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            if (field != null) return field.FieldType;
-
-            // Fallback
-            foreach (var assembly in System.AppDomain.CurrentDomain.GetAssemblies())
+            // Look for WaterSimulation in TerrainManager (as seen in source) or WaterManager
+            var tm = Singleton<TerrainManager>.instance;
+            if (tm != null)
             {
-                try
-                {
-                    foreach (var type in assembly.GetTypes())
-                    {
-                        if (type.Name == "WaterSimulation") return type;
-                    }
-                }
-                catch { }
+                var field = tm.GetType().GetField("m_waterSimulation", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (field != null) return field.FieldType;
+                
+                // Try property
+                var prop = tm.GetType().GetProperty("WaterSimulation", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                if (prop != null) return prop.PropertyType;
             }
 
-            return null;
+            var wm = Singleton<WaterManager>.instance;
+            if (wm != null)
+            {
+                var field = wm.GetType().GetField("m_waterSimulation", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (field != null) return field.FieldType;
+            }
+            
+            return Util.FindType("WaterSimulation");
         }
 
         [HarmonyPatch]
@@ -40,30 +43,26 @@ namespace CSM.ExtraLandscapingTools.Patching
             }
 
             [HarmonyPostfix]
-            public static void Postfix(bool __result, object[] __args)
+            public static void Postfix(bool __result, ref ushort source, object sourceData)
             {
                 if (CsmBridge.IsIgnoring()) return;
-                Log.Info($"CreateWaterSource Postfix: result={__result}, args={(__args != null ? __args.Length.ToString() : "null")}");
                 if (!__result) return;
+                
+                Log.Info($"CreateWaterSource Postfix: index={source}");
 
-                // New Signature likely: bool CreateWaterSource(ushort index, Vector3 inputPosition, Vector3 outputPosition, ushort type, ushort target, uint inputRate, ...)
-                if (__args != null && __args.Length >= 6)
-                {
-                    try {
-                        ushort index = (ushort)__args[0];
-                        Vector3 pos = (Vector3)__args[1];
-                        ushort type = (ushort)__args[3];
-                        ushort target = (ushort)__args[4];
-                        uint inputRate = (uint)__args[5];
-                        Log.Info($"Captured WaterSource: index={index}, pos={pos}, target={target}, rate={inputRate}");
-                        
-                        float targetWaterLevel = (float)target * (1f / 64f);
-                        float maxFlow = (float)inputRate / 65535f;
+                try {
+                    // Extract fields from WaterSource struct (sourceData)
+                    Vector3 inputPos = Util.GetPrivate<Vector3>(sourceData, "m_inputPosition");
+                    ushort target = Util.GetPrivate<ushort>(sourceData, "m_target");
+                    uint inputRate = Util.GetPrivate<uint>(sourceData, "m_inputRate");
+                    ushort type = Util.GetPrivate<ushort>(sourceData, "m_type");
 
-                        CsmBridge.SendWaterSource(WaterSourceAction.Create, index, pos, targetWaterLevel, maxFlow, type);
-                    } catch (System.Exception ex) {
-                        Log.Error($"Error parsing CreateWaterSource args: {ex.Message}");
-                    }
+                    float targetWaterLevel = (float)target * (1f / 64f);
+                    float maxFlow = (float)inputRate / 65535f;
+
+                    CsmBridge.SendWaterSource(WaterSourceAction.Create, source, inputPos, targetWaterLevel, maxFlow, type);
+                } catch (System.Exception ex) {
+                    Log.Error($"Error parsing WaterSource struct: {ex.Message}");
                 }
             }
         }

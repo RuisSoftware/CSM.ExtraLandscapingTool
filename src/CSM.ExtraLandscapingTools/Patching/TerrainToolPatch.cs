@@ -5,6 +5,7 @@ using ColossalFramework;
 using ColossalFramework.UI;
 using HarmonyLib;
 using CSM.ExtraLandscapingTools.Mod;
+using CSM.ExtraLandscapingTools.CSM;
 using CSM.ExtraLandscapingTools.Surface;
 using UnityEngine;
 
@@ -311,6 +312,18 @@ namespace CSM.ExtraLandscapingTools.Patching
                 }
             }
             TerrainModify.UpdateArea(minX, minZ, maxX, maxZ, true, false, false);
+
+            // Sync terrain heights to other multiplayer clients
+            int count = (maxX - minX + 1) * (maxZ - minZ + 1);
+            if (count > 0 && count < 100000)
+            {
+                ushort[] heights = new ushort[count];
+                int idx = 0;
+                for (int z = minZ; z <= maxZ; z++)
+                    for (int x = minX; x <= maxX; x++)
+                        heights[idx++] = rawHeights[z * (b + 1) + x];
+                CsmBridge.SendTerrainHeights(minX, minZ, maxX, maxZ, heights);
+            }
         }
 
         #region Undo System

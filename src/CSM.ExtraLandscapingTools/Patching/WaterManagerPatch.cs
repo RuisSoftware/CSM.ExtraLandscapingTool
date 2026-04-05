@@ -53,21 +53,27 @@ namespace CSM.ExtraLandscapingTools.Patching
             public static void Postfix(bool __result, object[] __args)
             {
                 if (CsmBridge.IsIgnoring()) return;
+                Log.Info($"CreateWaterSource Postfix: result={__result}, args={(__args != null ? __args.Length.ToString() : "null")}");
                 if (!__result) return;
 
                 // New Signature likely: bool CreateWaterSource(ushort index, Vector3 inputPosition, Vector3 outputPosition, ushort type, ushort target, uint inputRate, ...)
-                if (__args.Length >= 6)
+                if (__args != null && __args.Length >= 6)
                 {
-                    ushort index = (ushort)__args[0];
-                    Vector3 pos = (Vector3)__args[1];
-                    ushort type = (ushort)__args[3];
-                    ushort target = (ushort)__args[4];
-                    uint inputRate = (uint)__args[5];
-                    
-                    float targetWaterLevel = (float)target * (1f / 64f);
-                    float maxFlow = (float)inputRate / 65535f;
+                    try {
+                        ushort index = (ushort)__args[0];
+                        Vector3 pos = (Vector3)__args[1];
+                        ushort type = (ushort)__args[3];
+                        ushort target = (ushort)__args[4];
+                        uint inputRate = (uint)__args[5];
+                        Log.Info($"Captured WaterSource: index={index}, pos={pos}, target={target}, rate={inputRate}");
+                        
+                        float targetWaterLevel = (float)target * (1f / 64f);
+                        float maxFlow = (float)inputRate / 65535f;
 
-                    CsmBridge.SendWaterSource(WaterSourceAction.Create, index, pos, targetWaterLevel, maxFlow, type);
+                        CsmBridge.SendWaterSource(WaterSourceAction.Create, index, pos, targetWaterLevel, maxFlow, type);
+                    } catch (System.Exception ex) {
+                        Log.Error($"Error parsing CreateWaterSource args: {ex.Message}");
+                    }
                 }
             }
         }

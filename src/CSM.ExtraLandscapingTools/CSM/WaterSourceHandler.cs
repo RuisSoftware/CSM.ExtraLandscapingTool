@@ -25,23 +25,45 @@ namespace CSM.ExtraLandscapingTools.CSM
                 switch (command.Action)
                 {
                     case WaterSourceAction.Create:
-                        var createMethod = simType.GetMethod("CreateWaterSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-                        if (createMethod != null)
+                        var methods = simType.GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                        System.Reflection.MethodInfo actualMethod = null;
+                        foreach (var m in methods)
                         {
-                            var waterSourceType = Util.FindType("WaterSource");
-                            object waterSource = System.Activator.CreateInstance(waterSourceType);
-                            Util.SetPrivate(waterSource, "m_inputPosition", command.Position);
-                            Util.SetPrivate(waterSource, "m_outputPosition", command.Position);
-                            Util.SetPrivate(waterSource, "m_type", (ushort)command.Type);
-                            Util.SetPrivate(waterSource, "m_target", (ushort)Mathf.Clamp((int)(command.TargetWaterLevel * 63.999f), 0, 65535));
-                            
-                            uint rate = (uint)Mathf.Clamp((int)(command.MaxFlow * 65535f), 0, 65535);
-                            Util.SetPrivate(waterSource, "m_inputRate", rate);
-                            Util.SetPrivate(waterSource, "m_outputRate", rate);
+                            if (m.Name == "CreateWaterSource" && m.GetParameters().Length >= 9) // Support 9 or 10 param versions
+                            {
+                                actualMethod = m;
+                                break;
+                            }
+                        }
 
-                            // The provided WaterTool source uses: CreateWaterSource(out ushort index, WaterSource data)
-                            object[] args = new object[] { (ushort)0, waterSource };
-                            createMethod.Invoke(simulation, args);
+                        if (actualMethod != null)
+                        {
+                            uint rate = (uint)Mathf.Clamp((int)(command.MaxFlow * 65535f), 0, 65535);
+                            ushort target = (ushort)Mathf.Clamp((int)(command.TargetWaterLevel * 63.999f), 0, 65535);
+
+                            // Parameter sequence (based on Harmony discovery):
+                            // (ushort index, Vector3 inputPos, Vector3 outputPos, ushort type, ushort target, uint inRate, uint outRate, uint flow, uint water, uint pollution)
+                            // Some versions might skip the first 'ushort index' and return it instead.
+                            object[] args;
+                            var parms = actualMethod.GetParameters();
+                            if (parms.Length == 10 && parms[0].ParameterType == typeof(ushort))
+                            {
+                                args = new object[] {
+                                    (ushort)command.SourceIndex, command.Position, command.Position, (ushort)command.Type,
+                                    target, rate, rate, 0u, 0u, 0u
+                                };
+                            }
+                            else
+                            {
+                                // Traditional signature: (Vector3 inputPos, Vector3 outputPos, ushort type, ushort target, uint inRate, ...)
+                                args = new object[] {
+                                    command.Position, command.Position, (ushort)command.Type,
+                                    target, rate, rate, 0u, 0u, 0u
+                                };
+                            }
+                            
+                            actualMethod.Invoke(simulation, args);
+                            Log.Info($"Invoked CreateWaterSource at {command.Position}");
                         }
                         break;
 

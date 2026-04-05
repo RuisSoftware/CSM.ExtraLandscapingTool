@@ -42,6 +42,9 @@ namespace CSM.ExtraLandscapingTools.CSM
                     int z = command.CellData[i];
                     int x = command.CellData[i + 1];
 
+                    // Log identifying first few cells
+                    if (i == 0) Log.Info($"Updating cells for {command.ResourceType}: starting at ({x},{z})");
+
                     if (x < 0 || x >= 512 || z < 0 || z >= 512)
                         continue;
 

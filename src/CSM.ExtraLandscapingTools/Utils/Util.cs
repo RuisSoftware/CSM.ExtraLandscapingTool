@@ -190,12 +190,17 @@ namespace CSM.ExtraLandscapingTools.Utils
         public static bool IsModActive(string modName)
         {
             var plugins = PluginManager.instance.GetPluginsInfo();
-            return (from plugin in plugins.Where(p => p.isEnabled)
-                    select plugin.GetInstances<IUserMod>() into instances
-                    where instances.Any()
-                    select instances[0].Name into name
-                    where name == modName
-                    select name).Any();
+            foreach (var plugin in plugins)
+            {
+                if (!plugin.isEnabled) continue;
+
+                try {
+                    // Check userModInstance without calling GetInstances<T>() which is more aggressive
+                    var userMod = plugin.userModInstance as IUserMod;
+                    if (userMod != null && userMod.Name == modName) return true;
+                } catch { /* skip mods that fail to load types */ }
+            }
+            return false;
         }
 
         public static bool IsModAssemblyActive(string assemblyName)

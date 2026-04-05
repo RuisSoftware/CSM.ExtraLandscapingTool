@@ -105,6 +105,22 @@ namespace CSM.ExtraLandscapingTools.CSM
             SendToAll(cmd);
         }
 
+        internal static void SendTerrainHeights(int minX, int minZ, int maxX, int maxZ, ushort[] heights)
+        {
+            if (IsIgnoring()) return;
+            if (Command.SendToAll == null) return;
+
+            var cmd = new EltTerrainCommand
+            {
+                MinX = minX,
+                MinZ = minZ,
+                MaxX = maxX,
+                MaxZ = maxZ,
+                Heights = heights
+            };
+            SendToAll(cmd);
+        }
+
         internal static void SendToolCursor(Vector3 pos, float size, string toolName)
         {
             if (IsIgnoring()) return;

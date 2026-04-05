@@ -41,8 +41,9 @@ namespace CSM.ExtraLandscapingTools.Mod
                         if (m_CapacityText != null) m_CapacityText.text = value.ToString("0.0000");
                         
                         // Sync via CSM
-                        bool isPlaceWater = Util.GetPrivate<bool>(m_WaterTool, "m_PlaceWater");
-                        bool isSeaLevel = Util.GetPrivate<bool>(m_WaterTool, "m_MoveSeaLevel");
+                        int mode = Util.GetPrivate<int>(m_WaterTool, "m_mode");
+                        bool isPlaceWater = (mode == 0);
+                        bool isSeaLevel = (mode == 1);
                         CSM.CsmBridge.SendWaterCommand(false, value, isPlaceWater, isSeaLevel);
                     }
                 };
@@ -58,8 +59,9 @@ namespace CSM.ExtraLandscapingTools.Mod
                         if (m_CapacitySlider != null) m_CapacitySlider.value = result;
                         
                         // Sync via CSM
-                        bool isPlaceWater = Util.GetPrivate<bool>(m_WaterTool, "m_PlaceWater");
-                        bool isSeaLevel = Util.GetPrivate<bool>(m_WaterTool, "m_MoveSeaLevel");
+                        int mode = Util.GetPrivate<int>(m_WaterTool, "m_mode");
+                        bool isPlaceWater = (mode == 0);
+                        bool isSeaLevel = (mode == 1);
                         CSM.CsmBridge.SendWaterCommand(false, result, isPlaceWater, isSeaLevel);
                     }
                 };
@@ -83,7 +85,8 @@ namespace CSM.ExtraLandscapingTools.Mod
             // Set initial button state
             if (m_WaterTool != null)
             {
-                bool isPlaceWater = Util.GetPrivate<bool>(m_WaterTool, "m_PlaceWater");
+                int mode = Util.GetPrivate<int>(m_WaterTool, "m_mode");
+                bool isPlaceWater = (mode == 0);
                 if (isPlaceWater) m_PlaceWaterBtn?.Focus(); else m_MoveSeaLevelBtn?.Focus();
                 if (m_CapacityGroup != null) m_CapacityGroup.isVisible = isPlaceWater;
             }
@@ -104,8 +107,8 @@ namespace CSM.ExtraLandscapingTools.Mod
             if (waterTool != null)
             {
                 Log.Info($"WaterOptionPanel: Switching tool mode. PlaceWater={placeWater}");
-                Util.SetPrivate(waterTool, "m_PlaceWater", placeWater);
-                Util.SetPrivate(waterTool, "m_MoveSeaLevel", !placeWater);
+                // Mode enum: 0 = PlaceWaterSource, 1 = MoveSeaLevel
+                Util.SetPrivate(waterTool, "m_mode", placeWater ? 0 : 1);
                 
                 // Toggle enabled state to force the tool to refresh its cursor and internal state
                 waterTool.enabled = false;
@@ -132,7 +135,9 @@ namespace CSM.ExtraLandscapingTools.Mod
 
             if (m_WaterTool != null)
             {
-                bool isPlaceWater = Util.GetPrivate<bool>(m_WaterTool, "m_PlaceWater");
+                // In some game versions, m_PlaceWater is replaced by m_mode (enum)
+                int mode = Util.GetPrivate<int>(m_WaterTool, "m_mode");
+                bool isPlaceWater = (mode == 0);
                 
                 // Sync Capacity (only if in Place Water mode)
                 if (isPlaceWater && m_CapacitySlider != null && !m_CapacitySlider.hasFocus && m_CapacityText != null && !m_CapacityText.hasFocus)

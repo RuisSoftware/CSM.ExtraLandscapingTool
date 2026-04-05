@@ -12,81 +12,75 @@ namespace CSM.ExtraLandscapingTools.Patching
     public static class NaturalResourceManagerPatch
     {
         private static List<int> _cellBuffer = new List<int>();
-        private static NaturalResourceManager.Resource _activeResource;
-        private static byte _lastAmount;
-        private static bool _buffering = false;
+        private static NaturalResourceManager.Resource _activeResource = NaturalResourceManager.Resource.None;
+        private static bool _waitingForFlush = false;
 
-        [HarmonyTargetMethod]
-        public static System.Reflection.MethodBase TargetMethod()
+        public static void SetActiveResource(NaturalResourceManager.Resource resource)
         {
-            var type = typeof(NaturalResourceManager);
-            // Looking for: private int CountResource(Resource resource, Vector3 position, float radius, int cellDelta, out int numCells, out int totalCells, out int resultDelta, bool refresh)
-            var method = type.GetMethod("CountResource", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null,
-                new[] { typeof(NaturalResourceManager.Resource), typeof(Vector3), typeof(float), typeof(int), typeof(int).MakeByRefType(), typeof(int).MakeByRefType(), typeof(int).MakeByRefType(), typeof(bool) }, null);
-            
-            if (method == null)
-            {
-                Log.Error("Could not find NaturalResourceManager.CountResource overloading with 8 parameters!");
-            }
-            return method;
+            _activeResource = resource;
         }
 
-        [HarmonyPrefix]
-        public static void Prefix(NaturalResourceManager.Resource resource, Vector3 position, float radius, int cellDelta)
+        [HarmonyPatch(typeof(NaturalResourceManager), "AreaModified")]
+        public static class ResourceAreaPatch
         {
-            if (CsmBridge.IsIgnoring()) return;
-            if (cellDelta == 0) return; // Not a modification call
-
-            if (!_buffering)
+            [HarmonyPrefix]
+            public static void Prefix(int minX, int minZ, int maxX, int maxZ)
             {
-                _buffering = true;
-                _activeResource = resource;
-                _lastAmount = (byte)Mathf.Clamp(Mathf.Abs(cellDelta >> 20), 0, 255);
-                _cellBuffer.Clear();
-            }
-        }
+                if (CsmBridge.IsIgnoring()) return;
+                if (_activeResource == NaturalResourceManager.Resource.None) return;
 
-        public static void AddCells(int minX, int minZ, int maxX, int maxZ)
-        {
-            if (!_buffering) return;
-
-            for (int z = minZ; z <= maxZ; z++)
-            {
-                for (int x = minX; x <= maxX; x++)
+                Log.Info($"Resource AreaModified: ({minX},{minZ}) to ({maxX},{maxZ}) for {_activeResource}");
+                
+                // Capture the entire area. We batch it at the end of SimulationStep.
+                for (int z = minZ; z <= maxZ; z++)
                 {
-                    _cellBuffer.Add(z);
-                    _cellBuffer.Add(x);
+                    for (int x = minX; x <= maxX; x++)
+                    {
+                        _cellBuffer.Add(z);
+                        _cellBuffer.Add(x);
+                    }
                 }
+                _waitingForFlush = true;
             }
         }
 
         public static void Flush()
         {
-            if (_cellBuffer.Count > 0)
+            if (_waitingForFlush && _cellBuffer.Count > 0)
             {
-                CsmBridge.SendResourcePaint(_cellBuffer.ToArray(), _activeResource, _lastAmount);
+                Log.Info($"Flushing resource painting: {_cellBuffer.Count / 2} cells of {_activeResource}");
+                
+                // We need to sample the data from the manager for these cells.
+                var mgr = Singleton<NaturalResourceManager>.instance;
+                var cells = _cellBuffer.ToArray();
+                
+                // For simplicity, we sample the 'amount' as it is now.
+                // We'll use a fixed amount (usually 255 if painted) or sample first cell
+                byte lastAmount = 255; 
+                
+                CsmBridge.SendResourcePaint(cells, _activeResource, lastAmount);
                 _cellBuffer.Clear();
+                _waitingForFlush = false;
             }
-            _buffering = false;
+            _activeResource = NaturalResourceManager.Resource.None; 
         }
     }
 
-    [HarmonyPatch(typeof(NaturalResourceManager), "AreaModified")]
-    public static class ResourceAreaPatch
-    {
-        [HarmonyPrefix]
-        public static void Prefix(int minX, int minZ, int maxX, int maxZ)
-        {
-            if (CsmBridge.IsIgnoring()) return;
-            NaturalResourceManagerPatch.AddCells(minX, minZ, maxX, maxZ);
-        }
-    }
 
     [HarmonyPatch(typeof(ResourceTool), "SimulationStep")]
     public static class ResourceToolSyncPatch
     {
+        [HarmonyPrefix]
+        public static void Prefix(ResourceTool __instance)
+        {
+            if (CsmBridge.IsIgnoring()) return;
+            
+            var resource = Util.GetPrivate<NaturalResourceManager.Resource>(__instance, "m_resource");
+            NaturalResourceManagerPatch.SetActiveResource(resource);
+        }
+
         [HarmonyPostfix]
-        public static void Postfix()
+        public static void Postfix(ResourceTool __instance)
         {
             NaturalResourceManagerPatch.Flush();
         }

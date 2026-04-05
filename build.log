@@ -1,0 +1,17 @@
+=== Locating Dependencies ===
+Using Harmony Core: /var/mnt/schijven/1TB SSD/Games/Cities - Skylines/drive_c/Program Files (x86)/Cities.Skylines.v1.21.1.F5/Files/Mods/Harmony 2.2.2-0/CitiesHarmony.Harmony.dll
+Using Harmony API:  /var/mnt/schijven/1TB SSD/Games/Cities - Skylines/drive_c/Program Files (x86)/Cities.Skylines.v1.21.1.F5/Files/Mods/81 Tiles 2 1.0.5/CitiesHarmony.API.dll
+Using CSM API:      /var/mnt/schijven/1TB SSD/Games/Cities - Skylines/drive_c/Program Files (x86)/Cities.Skylines.v1.21.1.F5/Files/Mods/CSM_Built/CSM.API.dll
+=== Building CSM.ExtraLandscapingTools ===
+MSBuild version 17.8.49+7806cbf7b for .NET
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  CSM.ExtraLandscapingTools -> /var/home/king/CS1 Mods/CSM.ExtraLandscapingTools/src/CSM.ExtraLandscapingTools/bin/Release/net35/CSM.ExtraLandscapingTools.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.21
+=== Build Complete ===
+Mod DLL: src/CSM.ExtraLandscapingTools/bin/Release/net35/CSM.ExtraLandscapingTools.dll
